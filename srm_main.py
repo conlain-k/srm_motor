@@ -2,8 +2,6 @@ import numpy as np
 from matplotlib import pyplot as plt
 import constants
 from solid_rocket import *
-from area_bates import *
-from vis import *
 from srm_system import *
 import shapes
 
@@ -12,52 +10,8 @@ from pstats import Stats
 
 from itertools import chain
 
-
 fps = 25
 steps_per_frame = 1 / (fps * constants.delta_t)
-
-
-def computeTotalImpulse(thrusts):
-    return constants.delta_t * np.sum(thrusts[1:] + thrusts[:-1]) / 2.
-
-
-def createPlots():
-    fig, axes = plt.subplots(1, 3, figsize=(15, 5))
-
-    axes[0].set_xlabel("t (s)")
-    axes[0].set_ylabel("F (lbf)")
-    axes[0].set_title("Thrust $vs.$ time")
-    axes[0].set_adjustable("box")
-    axes[0].grid()
-
-    axes[1].set_xlabel("t")
-    axes[1].set_ylabel("$P_c$")
-    axes[1].set_title("Pressure $vs.$ time")
-    axes[1].set_adjustable("box")
-    axes[1].grid()
-
-    axes[2].set_xlabel("x")
-    axes[2].set_ylabel("$A_s$")
-    axes[2].set_title("Area $vs.$ regression distance")
-    axes[2].set_adjustable("box")
-    axes[2].grid()
-
-    fig.suptitle("SRM burn results")
-
-    return fig, axes
-
-
-def makeLegends(fig, axes):
-    axes[0].legend()
-    axes[1].legend()
-    axes[2].legend()
-
-
-def plotResults(fig, axes, pressures, thrusts, areas, x_vals, times, srm_type):
-    axes[0].plot(times, thrusts, '-', label=srm_type)
-    axes[1].plot(times, pressures, '-', label=srm_type)
-    axes[2].plot(x_vals, areas, '-', label=srm_type)
-
 
 def burnSRM(srm, srm_type, make_plot=False):
     pressures = []
@@ -98,7 +52,6 @@ def burnSRM(srm, srm_type, make_plot=False):
                 for ind, f in enumerate(figs):
                     f.savefig("images/{}_{}_{}.png".format(srm_type,
                                                            ind, int(step_num // steps_per_frame)))
-                    # print(f, type(f))
                     plt.close(f)
         t += constants.delta_t
         step_num += 1
@@ -107,8 +60,6 @@ def burnSRM(srm, srm_type, make_plot=False):
     thrusts = np.array(thrusts)
     areas = np.array(areas)
     x_vals = np.array(x_vals)
-
-    print(x_vals, areas)
 
     return pressures, thrusts, areas, x_vals
 
@@ -139,8 +90,6 @@ def main():
     bates_grain_ls = LevelSetSRM(shapecoll)
 
     theta = np.arange(0, 4) * np.pi / 4.
-    print(theta)
-
     lines_c = []
 
     lines = [shapes.LineSegment([finocyl_spoke_len * np.cos(t), finocyl_spoke_len * np.sin(
@@ -153,18 +102,17 @@ def main():
     booster_assembly = SRM_Assembly({finocyl_grain_ls: 2, bates_grain_ls: 5})
 
     Pb, Tb, Ab, xb, tb = runAndTimeSRM(booster_assembly, "Booster", True)
-    Pls, Tls, Als, xls, tls = runAndTimeSRM(sustainer_assembly, "Sustainer", True)
 
-    fig, axes = createPlots()
+    np.savetxt("results/Pb.txt", Pb)
+    np.savetxt("results/Tb.txt", Tb)
+    np.savetxt("results/Ab.txt", Ab)
+    np.savetxt("results/xb.txt", xb)
 
-    imp_bates = computeTotalImpulse(Tb)
-    imp_ls = computeTotalImpulse(Tls)
-
-    plotResults(fig, axes, Pb, Tb, Ab, xb, tb, "Booster, Impulse = {:.4f}".format(imp_bates))
-    plotResults(fig, axes, Pls, Tls, Als, xls, tls, "Sustainer, Impulse = {:.4f}".format(imp_ls))
-    makeLegends(fig, axes)
-    plt.savefig("srm_results.png")
-    plt.show()
+    Psus, Tsus, Asus, xsus, tsus = runAndTimeSRM(sustainer_assembly, "Sustainer", True)
+    np.savetxt("results/Psus.txt", Psus)
+    np.savetxt("results/Tsus.txt", Tsus)
+    np.savetxt("results/Asus.txt", Asus)
+    np.savetxt("results/xsus.txt", xsus)
 
 
 if __name__ == "__main__":

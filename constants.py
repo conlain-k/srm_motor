@@ -30,7 +30,7 @@ c_star = 4890.
 rho = 0.00176
 
 # timestep
-delta_t = 5e-4
+delta_t = 1e-3
 
 # cutoff end time
 t_end = 10

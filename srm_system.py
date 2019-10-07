@@ -119,7 +119,7 @@ class LevelSetSRM(SRM_Base):
             outer_circ_area = np.pi * constants.R_outer * constants.R_outer
             cap_area = outer_circ_area - internal_area
 
-            if cap_area <= .1:
+            if cap_area <= self.level_set.delta_x:
                 print("small cap area {}, perim is {}, len is {}".format(cap_area, perim,  self.getLength()))
                 # self.level_set.make_plot("test")
 

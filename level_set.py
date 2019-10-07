@@ -196,7 +196,7 @@ class LevelSet:
         if self.zerocontour is None:
             c = QuadContourGenerator.from_rectilinear(self.xpts, self.ypts, SDF, shapely_fmt)
             # print(c.filled_contour(max=0.0), type(c.filled_contour(max=0.0)), len(c.filled_contour(max=0.0)))
-            poly = c.filled_contour(max=0.0)[0]
+            poly = c.filled_contour(max=self.delta_x / 2)[0]
 
             nm = np.max(SDF[self.X**2 + self.Y**2 <= constants.R_outer**2])
 
@@ -204,7 +204,8 @@ class LevelSet:
 
             if nm <= min_dist * 2:
                 # smooth polygon if close to end
-                poly = poly.buffer(1, resolution = 16, join_style=1).buffer(-1, resolution = 16, join_style=1)
+                poly = poly.buffer(1, resolution=16, join_style=1).buffer(-1,
+                                                                          resolution=16, join_style=1)
 
             self.zerocontour = poly
 
@@ -224,14 +225,14 @@ class LevelSet:
         fig, ax = plt.subplots()
 
         inside_vals = np.where(SDF <= 0)
-        BC_vals = np.where(self.X**2 + self.Y**2 > constants.R_outer ** 2)
+        BC_vals = np.where(self.X**2 + self.Y**2 >= constants.R_outer ** 2)
 
         SDF[BC_vals] = BIG_NUMBER
         SDF[inside_vals] = np.nan
         SDF_mid = midpoints(SDF)
 
         sdfplot = ax.imshow(SDF_mid,
-                            cmap='coolwarm_r', vmax=constants.R_outer, extent=[-self.Lx / 2., self.Lx / 2., -self.Ly / 2., self.Ly / 2.])
+                            cmap='coolwarm_r', vmax=constants.R_outer, vmin=0, extent=[-self.Lx / 2., self.Lx / 2., -self.Ly / 2., self.Ly / 2.])
 
         SDF_mid[:] = 0
 
