@@ -5,15 +5,6 @@ import numpy as np
 def computeChamberPressure(burn_area):
 	return (rho * a * c_star * burn_area / area_throat) ** (1. / (1. - n))
 
-
-def computeRdot(Pc):
-	return a * (Pc ** n)
-
-
-def computeMdot(Rdot, burn_area):
-	return rho * burn_area * Rdot
-
-
 def computeExitVel():
 	under_rad = gamma * R * computeExitTemp()
 

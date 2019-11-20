@@ -2,15 +2,15 @@ import numpy as np
 
 # Compute thrust and pressure curves for cylindrical SRB
 # R_inner = 1.2255 / 2.
-R_inner = 1 / 2.
+R_inner = 1. / 2.
 R_outer = 3.225 / 2.
 grain_length = 5.346405
 finocyl_spoke_width = 0.05 * R_outer
 finocyl_spoke_len = 0.7 * R_outer
 
 
-diam_throat = 1.05
-area_throat = np.pi * (diam_throat / 2) ** 2
+diam_throat = 1.05 
+area_throat = np.pi * (diam_throat / 2.) ** 2
 
 # Burn rate coeff (in / s) (lbf / in^2) ^ -n
 a = 0.027

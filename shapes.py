@@ -10,6 +10,8 @@ class ShapeCollection:
         self.shapes.append(shape)
 
     def computeMinDistance(self, X, Y):
+        if len(self.shapes) == 0:
+            return None
         dists = np.array([s.distance(X, Y) for s in self.shapes])
 
         minval = np.amin(dists, axis=0)
@@ -83,7 +85,10 @@ class Circle(Shape):
         self.radius = np.array(radius)
 
     def distance(self, X, Y):
+        dX = (X - self.center[0])
+        dY = (Y - self.center[1])
 
-        dist = np.sqrt((X - self.center[0])**2 + (Y - self.center[1])**2) - self.radius
+
+        dist = np.sqrt(dX * dX + dY * dY) - self.radius
 
         return dist

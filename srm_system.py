@@ -4,10 +4,12 @@ import copy
 
 import constants
 
+
 class SRM_Assembly():
     def __init__(self, sub_srms):
         self.srm_counts = copy.deepcopy(sub_srms)
         self.sub_srms = list(self.srm_counts.keys())
+
     def isStillBurning(self):
         return np.any([sub.isStillBurning() for sub in self.sub_srms])
 
@@ -30,19 +32,18 @@ class SRM_Assembly():
             lens.append(sub_len)
         return np.average(lens)
 
-    def make_plot(self):
+    def make_plot(self, show_zero_set = True):
         figs = []
         for sub in self.sub_srms:
             if type(sub) == LevelSetSRM:
-                figs.append(sub.make_plot())
+                figs.append(sub.make_plot(show_zero_set))
         return figs
-                
-        
+
 
 class SRM_Base:
     def __init__(self):
         self.L_t = constants.grain_length
-    
+
     def getLength(self):
         return self.L_t
 
@@ -52,7 +53,6 @@ class SRM_Base:
     def advance(self, vel):
         return NotImplementedError()
 
-        
 
 class BatesSRM(SRM_Base):
     def __init__(self):
@@ -66,16 +66,8 @@ class BatesSRM(SRM_Base):
 
     def getArea(self):
         area_inner = self.L_t * 2. * np.pi * self.r_t
-
-        # print("area inner is {}".format(area_inner))
-
         # area for one end
         cap_area = np.pi * (constants.R_outer ** 2 - self.r_t ** 2)
-
-        # print("bates cap area is {}".format(cap_area))
-
-        if cap_area <= .1:
-            print("small cap area {}, perim is {}, len is {}".format(cap_area, area_inner / L_t,  L_t))
 
         return area_inner + cap_area + cap_area
 
@@ -105,7 +97,7 @@ class LevelSetSRM(SRM_Base):
         self.level_set.advance(vel)
         # also advance my length
         self.advanceLengthwise(vel)
-    
+
         # area is stale
         self.area = None
 
@@ -120,11 +112,12 @@ class LevelSetSRM(SRM_Base):
             cap_area = outer_circ_area - internal_area
 
             if cap_area <= self.level_set.delta_x:
-                print("small cap area {}, perim is {}, len is {}".format(cap_area, perim,  self.getLength()))
-                # self.level_set.make_plot("test")
+                print("small cap area {}, perim is {}, len is {}".format(
+                    cap_area, perim,  self.getLength()))
 
             if cap_area <= 0:
-                print("cap area is {}, outer is {}, inner is {}".format(cap_area, outer_circ_area, internal_area))
+                print("cap area is {}, outer is {}, inner is {}".format(
+                    cap_area, outer_circ_area, internal_area))
                 assert (False)
             self.area = perim * self.getLength() + 2 * cap_area
         return self.area
@@ -137,7 +130,7 @@ class LevelSetSRM(SRM_Base):
             print("no length left!")
             return False
         SDF = np.copy(self.level_set.getSDF())
-    
+
         nm = np.max(SDF[self.level_set.X**2 + self.level_set.Y**2 <= constants.R_outer**2])
 
         # if nm < 0.1:
@@ -148,5 +141,5 @@ class LevelSetSRM(SRM_Base):
         # Is any part of the SDF still burning?
         return nm >= min_dist / 4.
 
-    def make_plot(self):
-        return self.level_set.make_plot()
+    def make_plot(self, show_zero_set = True):
+        return self.level_set.make_plot(show_zero_set)

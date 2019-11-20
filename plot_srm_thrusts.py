@@ -33,15 +33,15 @@ def createPlots():
 
 
 def makeLegends(fig, axes):
-    axes[0].legend()
-    axes[1].legend()
-    axes[2].legend()
+    axes[0].legend(loc = 'upper right')
+    axes[1].legend(loc = 'upper right')
+    axes[2].legend(loc = 'upper right')
 
 
-def plotResults(fig, axes, pressures, thrusts, areas, x_vals, times, srm_type):
-    axes[0].plot(times, thrusts, '-', label=srm_type)
-    axes[1].plot(times, pressures, '-', label=srm_type)
-    axes[2].plot(x_vals, areas, '-', label=srm_type)
+def plotResults(fig, axes, pressures, thrusts, areas, x_vals, times, srm_type, symbol):
+    axes[0].plot(times, thrusts, symbol, label=srm_type)
+    axes[1].plot(times, pressures, symbol, label=srm_type)
+    axes[2].plot(x_vals, areas, symbol, label=srm_type)
 
 def main():
     Psus = np.loadtxt("results/Psus.txt")
@@ -58,13 +58,22 @@ def main():
 
     tb = constants.delta_t * np.arange(0, Pb.size)
 
+    Pbates = np.loadtxt("results/Pbates.txt")
+    Tbates = np.loadtxt("results/Tbates.txt")
+    Abates = np.loadtxt("results/Abates.txt")
+    xbates = np.loadtxt("results/xbates.txt")
+
+    tbates = constants.delta_t * np.arange(0, Pbates.size)
+
+    imp_bates_analyt = computeTotalImpulse(Tbates)
     imp_bates = computeTotalImpulse(Tb)
     imp_sus = computeTotalImpulse(Tsus)
 
     fig, axes = createPlots()
 
-    plotResults(fig, axes, Pb, Tb, Ab, xb, tb, "Booster, Impulse = {:.4f}".format(imp_bates))
-    plotResults(fig, axes, Psus, Tsus, Asus, xsus, tsus, "Sustainer, Impulse = {:.4f}".format(imp_sus))
+    plotResults(fig, axes, Pb, Tb, Ab, xb, tb, "Booster \nImpulse = {:.3f}".format(imp_bates), '-')
+    plotResults(fig, axes, Psus, Tsus, Asus, xsus, tsus, "Sustainer \nImpulse = {:.3f}".format(imp_sus), '--')
+    plotResults(fig, axes, Pbates, Tbates, Abates, xbates, tbates, "Sustainer (analytical) \nImpulse = {:.3f}".format(imp_bates_analyt), ':')
     makeLegends(fig, axes)
     plt.savefig("srm_results.png")
     plt.show()
